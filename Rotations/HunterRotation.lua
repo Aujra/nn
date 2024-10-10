@@ -11,57 +11,57 @@ function tt:HunterRotation()
         return
     end
     local pet = UnitName("pet")
-    local unitaround = target:EnemiesInRange(35)
+    local unitaround = target:EnemiesInRange(25)
 
     if player:IsCasting() then
         return
     end
 
-    local closestCaster = GetClosestCaster()
+    local closestCaster = tt:ClosestCastingEnemy()
+    local spec = GetSpecialization()
+    local specName = spec and select(2, GetSpecializationInfo(spec))
 
-    if closestCaster then
-        print("Interrupting " .. closestCaster.Name)
-        tt:Cast("Counter Shot", closestCaster.pointer)
+    if specName == "Marksmanship" then
     end
-
     if UnitAffectingCombat("player") then
         if target.HP > 80 and not target:HasAura("Hunter's Mark", "HARMFUL") then
             tt:Cast("Hunter's Mark")
         end
+        if (UnitHealth("player") / UnitHealthMax("player") * 100) < 30 then
+            tt:Cast("Fortitude of the Bear")
+        end
         if (UnitHealth("player") / UnitHealthMax("player") * 100) < 50 then
             tt:Cast("Exhilaration")
+        end
+        if (UnitHealth("player") / UnitHealthMax("player") * 100) < 60 and not player:HasAura("Survival of the Fittest", "HELPFUL") then
+            tt:Cast("Survival of the Fittest")
         end
         if pet and not UnitIsDead("pet") and (UnitHealth("pet") / UnitHealthMax("pet") * 100) < 90 then
             tt:Cast("Mend Pet")
         end
-        if target:ShouldInterruptCasting() then
-            tt:Cast("Counter Shot")
+        if closestCaster then
+            tt:Cast("Counter Shot", closestCaster.pointer)
         end
-        tt:Cast("Trueshot")
+
+        if IsPlayerSpell(193533) and not player:HasAura("Steady Focus", "HELPFUL") then
+            print("Steady Focus")
+            tt:Cast("Steady Shot")
+        end
         tt:Cast("Kill Shot")
-        if player:HasAura("Precise Shots", "HELPFUL") then
+        tt:Cast("Rapid Fire")
+        Unlock(RunMacroText, "/use 13")
+        Unlock(RunMacroText, "/use 14")
+        tt:Cast("Trueshot")
+        tt:Cast("Wailing Arrow")
+        tt:Cast("Aimed Shot")
+        if player:HasAura("Precise Shots", "HELPFUL") and player.Focus > 55 then
             if unitaround > 2 then
                 tt:Cast("Multi-Shot")
             else
                 tt:Cast("Arcane Shot")
             end
         end
-        tt:Cast("Wailing Arrow")
-        tt:Cast("Rapid Fire")
-        tt:Cast("Aimed Shot")
         tt:Cast("Explosive Shot")
-        tt:Cast("Trueshot")
-        tt:Cast("Kill Shot")
-        tt:Cast("Wailing Arrow")
-        tt:Cast("Rapid Fire")
-        tt:Cast("Aimed Shot")
-        tt:Cast("Explosive Shot")
-
-        if unitaround > 2 then
-            tt:Cast("Multi-Shot")
-        else
-            tt:Cast("Arcane Shot")
-        end
         tt:Cast("Steady Shot")
     end
 end
@@ -71,8 +71,7 @@ function GetClosestCaster()
     local closestDistance = 9999
     for k,v in pairs(tt.Units) do
         if v.Reaction <= 4 and UnitAffectingCombat(v.pointer) and
-        v:ShouldInterruptCasting() then
-            print("Found caster " .. v.Name)
+        v:ShouldInterruptCasting() and v:DistanceFromPlayer() < 30 then
             local distance = v:DistanceFromPlayer()
             if distance < closestDistance then
                 closest = v

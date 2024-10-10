@@ -11,6 +11,8 @@ function Unit:init(pointer)
     self.Distance = self:DistanceFromPlayer()
     self.Health = UnitHealth(self.pointer)
     self.MaxHealth = UnitHealthMax(self.pointer)
+    self.Enemy = self.Reaction < 4
+    self.IsDead = UnitIsDeadOrGhost(self.pointer)
     self.HP = (self.Health / self.MaxHealth) * 100
 end
 
@@ -21,12 +23,15 @@ function Unit:Update()
     self.Distance = self:DistanceFromPlayer()
     self.Health = UnitHealth(self.pointer)
     self.MaxHealth = UnitHealthMax(self.pointer)
+    self.Enemy = self.Reaction < 4
+    self.IsDead = UnitIsDeadOrGhost(self.pointer)
     self.HP = (self.Health / self.MaxHealth) * 100
 end
 
 function Unit:DistanceFromPlayer()
     local x1, y1, z1 = self.x, self.y, self.z
     local x2, y2, z2 = ObjectPosition("player")
+    local dist = math.sqrt((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)
     return math.sqrt((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)
 end
 

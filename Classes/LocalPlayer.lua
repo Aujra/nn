@@ -10,6 +10,7 @@ function LocalPlayer:init(pointer)
     self.Health = UnitHealth(pointer)
     self.MaxHealth = UnitHealthMax(pointer)
     self.HP = (self.Health / self.MaxHealth) * 100
+    self.Focus = 0
 end
 
 function LocalPlayer:Update(pointer)
@@ -21,6 +22,7 @@ function LocalPlayer:Update(pointer)
     self.MaxHealth = UnitHealthMax("player")
     self.HP = (self.Health / self.MaxHealth) * 100
     self.IsMoving = GetUnitSpeed("player") > 0
+    self.Focus = UnitPower("player", 2)
 end
 
 function LocalPlayer:DistanceFromPlayer()
@@ -41,6 +43,10 @@ function LocalPlayer:UnitsInRange(range)
         end
     end
     return units
+end
+
+function LocalPlayer:CastOn(spell)
+    return Unlock(CastSpellByName, spell, "player")
 end
 
 function LocalPlayer:HasAura(name, filter)

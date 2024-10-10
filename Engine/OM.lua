@@ -6,11 +6,13 @@ tt.GameObjects = {}
 tt.Units = {}
 tt.Players = {}
 tt.LocalPlayer = {}
+tt.Party = {}
 
 OM.GameObjects = tt.GameObjects
 OM.Units = tt.Units
 OM.Players = tt.Players
 OM.LocalPlayer = tt.LocalPlayer
+OM.Party = tt.Party
 
 function OM:Update()
     local objects = Objects()
@@ -19,6 +21,10 @@ function OM:Update()
     local players = tt.nn.ObjectManager(6)
 
     --OM:CleanOM()
+
+    table.wipe(self.Party)
+
+    --tinsert(self.Party, tt.LocalPlayer)
 
     for v,k in pairs(gameobjects) do
         if not self.GameObjects[k] then
@@ -39,6 +45,11 @@ function OM:Update()
             self.Players[k] = tt.Classes.Player:new(k)
         else
             self.Players[k]:Update()
+        end
+        if UnitInParty(k) then
+            if not self.Party[k] then
+                self.Party[k] = tt.Players[k]
+            end
         end
     end
 end

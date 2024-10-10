@@ -1,57 +1,67 @@
+local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
+local ScrollingTable = LibStub("ScrollingTable");
+
 local unitViewer = {}
 tt.UI.UnitViewer = unitViewer
 
 print("UnitViewer loaded")
 
 local viewerFrame = nil
+local ScrollTable = nil
 local searchTable = nil
-local fake_cols = {
-    {
-        ["name"] = "GUID",
-        ["width"] = 100,
-        ["align"] = "CENTER",
-        ["colorargs"] = nil,
-        ["defaultsort"] = "dsc"
-    },
-    {
-        ["name"] = "Name",
-        ["width"] = 350,
-        ["align"] = "CENTER",
-        ["colorargs"] = nil,
-        ["defaultsort"] = "dsc"
-    },
-    {
-        ["name"] = "Level",
-        ["width"] = 350,
-        ["align"] = "CENTER",
-        ["colorargs"] = nil,
-        ["defaultsort"] = "dsc"
-    },
-    {
-        ["name"] = "Distance",
-        ["width"] = 350,
-        ["align"] = "CENTER",
-        ["colorargs"] = nil,
-        ["defaultsort"] = "dsc"
-    }
-}
+local cols = {}
 local data = {}
 
-function unitViewer:UpdateUnits()
-    data = {
-        "a","b","c","d"
+function tt:AddColumn(name)
+    local column = {
+        ["name"] = name,
+        ["width"] = 100,
+        ["align"] = "LEFT",
+        ["color"] = {
+            ["r"] = 1.0,
+            ["g"] = 1.0,
+            ["b"] = 1.0,
+            ["a"] = 1.0
+        },
+        ["colorargs"] = nil,
+        ["bgcolor"] = {
+            ["r"] = 0.0,
+            ["g"] = 0.0,
+            ["b"] = 0.0,
+            ["a"] = 1.0
+        },
+        ["DoCellUpdate"] = nil,
     }
+    table.insert(cols, column)
+end
+
+function unitViewer:UpdateUnits()
+    data = {}
+    for k,v in pairs(tt.Units) do
+        if v.pointer then
+            local row = {
+                v.Name,
+                v.pointer,
+                v:DistanceFromPlayer(),
+            }
+            table.insert(data, row)
+        end
+    end
     if not viewerFrame then
-        viewerFrame = tt.nn.Utils.AceGUI:Create("Frame")
+        viewerFrame = AceGUI:Create("Window", "ObjectViewerFrame", UIParent)
         viewerFrame:SetTitle("Unit Viewer")
-        viewerFrame:SetLayout("Fill")
-        viewerFrame:SetWidth(800)
+        viewerFrame:SetLayout("Flow")
+        viewerFrame:SetWidth(1024)
         viewerFrame:SetHeight(600)
         viewerFrame:Show()
     end
-    if not searchTable then
-        searchTable = tt.nn.Utils.AceGUI:Create("SearchTable", fake_cols)
-        viewerFrame:AddChild(searchTable)
+
+    tt:AddColumn("Name")
+    tt:AddColumn("Pointer")
+    tt:AddColumn("Distance")
+
+    if not ScrollTable then
+        ScrollTable = ScrollingTable:CreateST(cols, nil, nil, nil, viewerFrame.frame);
     end
-    searchTable.scrollInstance:SetData(data, true)
+    ScrollTable:SetData(data, true)
 end
